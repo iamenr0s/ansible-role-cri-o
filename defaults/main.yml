@@ -1,2 +1,28 @@
 ---
 # defaults file for ansible-role-cri-o
+
+crio_version: "v1.29"
+
+# Package options.
+crio_package: cri-o
+crio_package_state: present
+
+# Service options.
+crio_service_state: started
+crio_service_enabled: true
+
+# Storage driver
+crio_storage_driver: "overlay"
+
+# Systemd slice to run the cri-o service in
+crio_systemd_slice: "system.slice"
+
+# Container runtime
+crio_runtime: "runc"
+
+# CRI-O extra configurations
+crio_extra_config: ''
+
+# CRI-O extra environment variables
+crio_yum_base_url: "https://download.opensuse.org/repositories/isv:/kubernetes:/addons:/cri-o:/stable:/{{ crio_version }}/rpm/"
+crio_yum_gpg_key: "https://download.opensuse.org/repositories/isv:/kubernetes:/addons:/cri-o:/stable:/{{ crio_version }}/rpm/repodata/repomd.xml.key"

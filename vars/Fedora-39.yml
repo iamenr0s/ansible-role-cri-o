@@ -1,0 +1,4 @@
+---
+# vars file for fedora-39
+
+crio_yum_repository: "https://download.opensuse.org/repositories/isv:/kubernetes:/addons:/cri-o:/stable:/{{ crio_version }}/rpm/isv:kubernetes:addons:cri-o:stable:{{ crio_version }}.repo"
