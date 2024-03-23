@@ -1,2 +1,86 @@
 ---
 # tasks file for ansible-role-cri-o
+
+- name: Include based RedHat OS Family
+  include_tasks: setup-RedHat.yml
+  when: ansible_os_family == 'RedHat'
+
+- name: Ensure /etc/crio/crio.conf.d exists
+  file:
+    path: "/etc/crio/crio.conf.d"
+    state: directory
+    owner: root
+    group: root
+    mode: 0755
+
+- name: Install crun
+  package:
+    name: "crun"
+    state: "{{ crio_package_state }}"
+  when: crio_runtime == 'crun'
+
+- name: Configure CRI-O to use crun
+  copy:
+    src: "crun.conf"
+    dest: "/etc/crio/crio.conf.d/99-crun.conf"
+    owner: root
+    group: root
+    mode: 0644
+  when: crio_runtime == 'crun'
+
+- name: Install kubernetes-cni
+  package:
+    name: "kubernetes-cni"
+    state: "{{ crio_package_state }}"
+
+- name: Install containers-common
+  package:
+    name: "containers-common"
+    state: "{{ crio_package_state }}"
+
+- name: Set the CRI-O storage driver
+  lineinfile:
+    path: "/etc/containers/storage.conf"
+    regexp: '^driver\s*='
+    line: 'driver = "{{ crio_storage_driver }}"'
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Ensure /etc/systemd/system/crio.service.d exists
+  file:
+    path: "/etc/systemd/system/crio.service.d"
+    state: directory
+    owner: root
+    group: root
+    mode: 0755
+  when: crio_systemd_slice != 'system.slice'
+
+- name: Set the systemd slice of the CRI-O service
+  template:
+    src: "crio-slice.conf.j2"
+    dest: "/etc/systemd/system/crio.service.d/slice.conf"
+    owner: root
+    group: root
+    mode: 0644
+  when: crio_systemd_slice != 'system.slice'
+
+- name: Add extra CRI-O configuration to /etc/crio/crio.conf.d
+  copy:
+    content: "{{ crio_extra_config }}"
+    dest: "/etc/crio/crio.conf.d/99-extra.conf"
+    owner: root
+    group: root
+    mode: 0644
+  when: crio_extra_config != ''
+
+- name: Ensure CRI-O is installed.
+  package:
+    name: "{{ crio_package }}"
+    state: "{{ crio_package_state }}"
+
+- name: Ensure CRI-O is started and enabled at boot.
+  service:
+    name: crio
+    state: "{{ crio_service_state }}"
+    enabled: "{{ crio_service_enabled }}"

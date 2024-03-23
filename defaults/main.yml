@@ -22,7 +22,3 @@ crio_runtime: "runc"
 
 # CRI-O extra configurations
 crio_extra_config: ''
-
-# CRI-O extra environment variables
-crio_yum_base_url: "https://download.opensuse.org/repositories/isv:/kubernetes:/addons:/cri-o:/stable:/{{ crio_version }}/rpm/"
-crio_yum_gpg_key: "https://download.opensuse.org/repositories/isv:/kubernetes:/addons:/cri-o:/stable:/{{ crio_version }}/rpm/repodata/repomd.xml.key"
