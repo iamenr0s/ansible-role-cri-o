@@ -2,8 +2,17 @@
 driver:
   name: podman
 platforms:
-  - name: instance
+  - name: instance-fedora39
     image: docker.io/iamenr0s/docker-fedora39-ansible:latest
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:rw
+      - /var/lib/containerd
+    privileged: true
+    pre_build_image: true
+    cgroupns_mode: host
+    command: ${MOLECULE_PODMAN_COMMAND:-""}
+  - name: instance-almalinux9
+    image: docker.io/iamenr0s/docker-almalinux9-ansible:latest
     volumes:
       - /sys/fs/cgroup:/sys/fs/cgroup:rw
       - /var/lib/containerd
