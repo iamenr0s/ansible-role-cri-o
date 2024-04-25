@@ -51,7 +51,7 @@ No dependencies required.
 Example Playbook
 ----------------
 
-    - hosts: servers
+    - hosts: all
       roles:
          - { role: iamenr0s.cri_o }
 
