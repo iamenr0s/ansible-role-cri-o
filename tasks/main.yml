@@ -2,11 +2,11 @@
 # tasks file for ansible-role-cri-o
 
 - name: Include based RedHat OS Family
-  include_tasks: setup-RedHat.yml
+  ansible.builtin.include_tasks: setup-RedHat.yml
   when: ansible_os_family == 'RedHat'
 
 - name: Ensure /etc/crio/crio.conf.d exists
-  file:
+  ansible.builtin.file:
     path: "/etc/crio/crio.conf.d"
     state: directory
     owner: root
@@ -14,13 +14,13 @@
     mode: 0755
 
 - name: Install crun
-  package:
+  ansible.builtin.package:
     name: "crun"
     state: "{{ crio_package_state }}"
   when: crio_runtime == 'crun'
 
 - name: Configure CRI-O to use crun
-  copy:
+  ansible.builtin.copy:
     src: "crun.conf"
     dest: "/etc/crio/crio.conf.d/99-crun.conf"
     owner: root
@@ -29,12 +29,12 @@
   when: crio_runtime == 'crun'
 
 - name: Install containers-common
-  package:
+  ansible.builtin.package:
     name: "containers-common"
     state: "{{ crio_package_state }}"
 
 - name: Ensure /etc/systemd/system/crio.service.d exists
-  file:
+  ansible.builtin.file:
     path: "/etc/systemd/system/crio.service.d"
     state: directory
     owner: root
@@ -43,7 +43,7 @@
   when: crio_systemd_slice != 'system.slice'
 
 - name: Set the systemd slice of the CRI-O service
-  template:
+  ansible.builtin.template:
     src: "crio-slice.conf.j2"
     dest: "/etc/systemd/system/crio.service.d/slice.conf"
     owner: root
@@ -52,7 +52,7 @@
   when: crio_systemd_slice != 'system.slice'
 
 - name: Add extra CRI-O configuration to /etc/crio/crio.conf.d
-  copy:
+  ansible.builtin.copy:
     content: "{{ crio_extra_config }}"
     dest: "/etc/crio/crio.conf.d/99-extra.conf"
     owner: root
@@ -61,12 +61,12 @@
   when: crio_extra_config != ''
 
 - name: Ensure CRI-O is installed.
-  package:
+  ansible.builtin.package:
     name: "{{ crio_package }}"
     state: "{{ crio_package_state }}"
 
 - name: Ensure CRI-O is started and enabled at boot.
-  service:
+  ansible.builtin.service:
     name: crio
     state: "{{ crio_service_state }}"
     enabled: "{{ crio_service_enabled }}"
