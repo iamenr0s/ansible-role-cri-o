@@ -20,6 +20,15 @@ platforms:
     pre_build_image: true
     cgroupns_mode: host
     command: ${MOLECULE_PODMAN_COMMAND:-""}
+  - name: instance-rockylinux9
+    image: docker.io/iamenr0s/docker-rockylinux9-ansible:latest
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:rw
+      - /var/lib/containerd
+    privileged: true
+    pre_build_image: true
+    cgroupns_mode: host
+    command: ${MOLECULE_PODMAN_COMMAND:-""}
 provisioner:
   name: ansible
 verifier:
