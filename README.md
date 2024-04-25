@@ -20,27 +20,27 @@ Role Variables
 
 Available variables and their default values are listed below (refer to defaults/main.yml):
 
-#### Package version.
+### Package version.
 	crio_version: "v1.29"
 
-Package options.
+### Package options.
 	crio_package: cri-o
 	crio_package_state: present
 
-Service options.
+### Service options.
 	crio_service_state: started
 	crio_service_enabled: true
 
-Storage driver
+### Storage driver
 	crio_storage_driver: "overlay"
 
-Systemd slice to run the cri-o service in
+### Systemd slice to run the cri-o service in
 	crio_systemd_slice: "system.slice"
 
-Container runtime
+### Container runtime
 	crio_runtime: "runc"
 
-CRI-O extra configurations
+### CRI-O extra configurations
 	crio_extra_config: ''
 
 Dependencies
@@ -62,5 +62,4 @@ BSD
 
 Author Information
 ------------------
-
 
