@@ -1,4 +1,4 @@
-Role Name
+Ansible Role: CRI-O
 =========
 
 This Ansible Role automates the installation of CRI-O on Linux systems.
@@ -51,11 +51,9 @@ No dependencies required.
 Example Playbook
 ----------------
 
-Including an example of how to use your role (for instance, with variables passed in as parameters) is always nice for users too:
-
     - hosts: servers
       roles:
-         - { role: username.rolename, x: 42 }
+         - { role: iamenr0s.cri_o }
 
 License
 -------
