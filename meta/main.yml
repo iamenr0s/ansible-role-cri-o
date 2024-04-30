@@ -4,13 +4,22 @@ dependencies: []
 galaxy_info:
   role_name: cri_o
   author: iamenr0s
-  description: your role description
+  description: This Ansible Role automates the installation of CRI-O on Linux systems.
   license: license (BSD, MIT)
   min_ansible_version: 2.10
-  platforms:
-    - name: RedHat
-      versions:
-        - fedora
+  platforms:
+    - name: "EL"
+      versions:
+        - "8"
+        - "9"
+    - name: "Rocky"
+      versions:
+        - "8.0"
+        - "9.0"
+    - name: "Fedora"
+      versions:
+        - "38"
+        - "39"
   galaxy_tags:
     - cri-o
     - system
