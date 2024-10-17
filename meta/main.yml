@@ -1,0 +1,30 @@
+---
+dependencies: []
+
+galaxy_info:
+  role_name: ansible_role_cri-o
+  author: iamenr0s
+  description: This Ansible Role automates the installation of CRI-O on Linux systems.
+  license: This project is licensed under the MIT License.
+  min_ansible_version: "2.10"
+  platforms:
+    - name: "EL"
+      versions:
+        - "8"
+        - "9"
+    - name: "Rocky"
+      versions:
+        - "8.0"
+        - "9.0"
+    - name: "Fedora"
+      versions:
+        - "38"
+        - "39"
+  galaxy_tags:
+    - cri-o
+    - system
+    - containers
+    - docker
+    - orchestration
+    - kubernetes
+    - k8s
