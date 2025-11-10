@@ -1,0 +1,19 @@
+---
+# tasks file for Debian/Ubuntu setup
+
+- name: setup-Debian | Add CRI-O APT repository GPG key
+  ansible.builtin.apt_key:
+    url: "{{ crio_apt_key_url }}"
+    keyring: "/usr/share/keyrings/crio-obs.gpg"
+    state: present
+
+- name: setup-Debian | Add CRI-O APT repository
+  ansible.builtin.apt_repository:
+    repo: "deb [signed-by=/usr/share/keyrings/crio-obs.gpg] {{ crio_apt_repository }} /"
+    filename: "cri-o"
+    state: present
+
+- name: setup-Debian | Update apt cache
+  ansible.builtin.apt:
+    update_cache: true
+    cache_valid_time: 3600

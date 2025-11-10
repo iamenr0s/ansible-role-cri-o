@@ -1,0 +1,142 @@
+---
+# tasks file for ansible-role-cri-o
+
+- name: Include based RedHat OS Family
+  ansible.builtin.include_tasks: setup-RedHat.yml
+  when: ansible_os_family == 'RedHat'
+
+- name: Include based Debian OS Family
+  ansible.builtin.include_tasks: setup-Debian.yml
+  when: ansible_os_family == 'Debian' 
+
+- name: Set desired CRI-O major.minor version (RedHat)
+  ansible.builtin.set_fact:
+    crio_desired_version: "{{ crio_version | regex_replace('^v', '') }}"
+  when: ansible_os_family == 'RedHat'
+
+- name: Set desired CRI-O major.minor version (Debian)
+  ansible.builtin.set_fact:
+    crio_desired_version: "{{ crio_version | regex_replace('^v', '') }}"
+  when: ansible_os_family == 'Debian'
+
+- name: Ensure /etc/crio/crio.conf.d exists
+  ansible.builtin.file:
+    path: "/etc/crio/crio.conf.d"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Install crun
+  ansible.builtin.dnf5:
+    name: "crun"
+    state: "{{ crio_package_state }}"
+  when:
+    - crio_runtime == 'crun'
+    - ansible_distribution == 'Fedora'
+    - (ansible_distribution_major_version | int) >= 41
+
+- name: Install crun (RedHat dnf)
+  ansible.builtin.dnf:
+    name: "crun"
+    state: "{{ crio_package_state }}"
+  when:
+    - crio_runtime == 'crun'
+    - ansible_os_family == 'RedHat'
+    - not (ansible_distribution == 'Fedora' and (ansible_distribution_major_version | int) >= 41)
+
+- name: Install crun (Debian)
+  ansible.builtin.apt:
+    name: "crun"
+    state: "{{ crio_package_state }}"
+  when:
+    - ansible_os_family == 'Debian'
+    - crio_runtime == 'crun'
+
+- name: Configure CRI-O to use crun
+  ansible.builtin.copy:
+    src: "crun.conf"
+    dest: "/etc/crio/crio.conf.d/99-crun.conf"
+    owner: root
+    group: root
+    mode: "0644"
+  when: crio_runtime == 'crun'
+
+- name: Install containers-common
+  ansible.builtin.dnf5:
+    name: "containers-common"
+    state: "{{ crio_package_state }}"
+  when:
+    - ansible_distribution == 'Fedora'
+    - (ansible_distribution_major_version | int) >= 41
+
+- name: Install containers-common (RedHat dnf)
+  ansible.builtin.dnf:
+    name: "containers-common"
+    state: "{{ crio_package_state }}"
+  when:
+    - ansible_os_family == 'RedHat'
+    - not (ansible_distribution == 'Fedora' and (ansible_distribution_major_version | int) >= 41)
+
+- name: Ensure /etc/systemd/system/crio.service.d exists
+  ansible.builtin.file:
+    path: "/etc/systemd/system/crio.service.d"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  when: crio_systemd_slice != 'system.slice'
+
+- name: Set the systemd slice of the CRI-O service
+  ansible.builtin.template:
+    src: "crio-slice.conf.j2"
+    dest: "/etc/systemd/system/crio.service.d/slice.conf"
+    owner: root
+    group: root
+    mode: "0644"
+  when: crio_systemd_slice != 'system.slice'
+
+- name: Add extra CRI-O configuration to /etc/crio/crio.conf.d
+  ansible.builtin.copy:
+    content: "{{ crio_extra_config }}"
+    dest: "/etc/crio/crio.conf.d/99-extra.conf"
+    owner: root
+    group: root
+    mode: "0644"
+  when: (crio_extra_config | default('')) | length > 0
+
+- name: Ensure CRI-O is installed.
+  ansible.builtin.dnf5:
+    name: "{{ crio_package }}"
+    state: "{{ crio_package_state }}"
+  when:
+    - ansible_distribution == 'Fedora'
+    - (ansible_distribution_major_version | int) >= 41
+
+- name: Ensure CRI-O is installed (RedHat dnf)
+  ansible.builtin.dnf:
+    name: "{{ crio_package }}"
+    state: "{{ crio_package_state }}"
+  when:
+    - ansible_os_family == 'RedHat'
+    - not (ansible_distribution == 'Fedora' and (ansible_distribution_major_version | int) >= 41)
+
+- name: Ensure CRI-O is installed (Debian)
+  ansible.builtin.apt:
+    name: "{{ crio_package }}"
+    state: "{{ crio_package_state }}"
+  when: ansible_os_family == 'Debian'
+
+- name: Ensure CRI-O is started and enabled at boot.
+  ansible.builtin.service:
+    name: crio
+    state: "{{ crio_service_state }}"
+    enabled: "{{ crio_service_enabled }}"
+  when: ansible_os_family == 'RedHat' and (crio_service_state == 'started' or (crio_service_enabled | bool))
+
+- name: Ensure CRI-O is started and enabled at boot. (Debian)
+  ansible.builtin.service:
+    name: crio
+    state: "{{ crio_service_state }}"
+    enabled: "{{ crio_service_enabled }}"
+  when: ansible_os_family == 'Debian' and (crio_service_state == 'started' or (crio_service_enabled | bool))

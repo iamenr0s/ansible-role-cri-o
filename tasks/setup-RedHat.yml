@@ -1,0 +1,14 @@
+---
+# tasks file for ansible-role-cri-o
+
+# - name: Include OS-specific variables (RedHat).
+#   ansible.builtin.include_vars: "{{ ansible_distribution }}-{{ ansible_distribution_version.split('.')[0] }}.yml"
+#   when:
+#   - ansible_os_family == 'RedHat'
+- name: setup-RedHat | Add CRI-O repository.
+  ansible.builtin.get_url:
+    url: "{{ crio_yum_repository }}"
+    dest: "/etc/yum.repos.d/cri-o.repo"
+    owner: root
+    group: root
+    mode: "0644"

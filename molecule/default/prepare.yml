@@ -1,0 +1,29 @@
+---
+
+- name: Prepare
+  hosts: all
+  gather_facts: true
+  become: false
+
+  tasks:
+    - name: Ensure /tmp exists
+      ansible.builtin.file:
+        path: /tmp
+        state: directory
+        mode: '0777'
+
+    - name: Verify Python 3 is available
+      ansible.builtin.assert:
+        that:
+          - ansible_python_version is defined
+          - ansible_python_version is version('3.0', '>=')
+        fail_msg: "Python 3 is required but not available"
+        success_msg: "Python {{ ansible_python_version }} is available"
+
+    - name: Install python3-apt and GPG tools (Debian/Ubuntu)
+      ansible.builtin.raw: |
+        export DEBIAN_FRONTEND=noninteractive
+        apt-get update -y
+        apt-get install -y python3-apt gnupg ca-certificates
+      become: true
+      when: ansible_os_family == 'Debian'

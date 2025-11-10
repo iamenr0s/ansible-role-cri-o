@@ -1,0 +1,24 @@
+---
+- name: Converge
+  hosts: all
+  become: false
+  vars:
+    crio_service_state: stopped
+    crio_service_enabled: false
+
+  pre_tasks:
+    - name: Wait for systemd to complete initialization
+      command: systemctl is-system-running
+      register: systemctl_status
+      until: >
+        'running' in systemctl_status.stdout or
+        'degraded' in systemctl_status.stdout
+      retries: 30
+      delay: 5
+      when: ansible_service_mgr == 'systemd'
+      changed_when: false
+      failed_when: systemctl_status.rc > 1
+
+  roles:
+    - role: iamenr0s.ansible_role_cri_o
+      when: ansible_os_family == 'RedHat'
