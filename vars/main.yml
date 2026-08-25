@@ -3,13 +3,9 @@
 
 crio_yum_repository: "https://download.opensuse.org/repositories/isv:/kubernetes:/addons:/cri-o:/stable:/{{ crio_version }}/rpm/isv:kubernetes:addons:cri-o:stable:{{ crio_version }}.repo"
 
-# Debian/Ubuntu OBS repository variables
-crio_apt_repo_base: "https://download.opensuse.org/repositories/isv:/kubernetes:/addons:/cri-o:/stable:/{{ crio_version }}/"
-crio_apt_distribution_path: >-
-  {% if ansible_distribution == 'Ubuntu' %}
-  xUbuntu_{{ ansible_distribution_version }}
-  {% else %}
-  Debian_{{ ansible_distribution_version.split('.')[0] }}
-  {% endif %}
-crio_apt_repository: "{{ crio_apt_repo_base }}{{ crio_apt_distribution_path }}"
+# Debian/Ubuntu OBS repository variables.
+# The OBS project publishes a single flat "deb" repo (Codename: deb, no
+# per-distro Debian_XX/xUbuntu_XX subdirectory) shared by every Debian and
+# Ubuntu release — confirmed via the Release file at .../deb/Release.
+crio_apt_repository: "https://download.opensuse.org/repositories/isv:/kubernetes:/addons:/cri-o:/stable:/{{ crio_version }}/deb"
 crio_apt_key_url: "{{ crio_apt_repository }}/Release.key"
