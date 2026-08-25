@@ -1,5 +1,7 @@
 ---
 
+dependencies: []
+
 galaxy_info:
   role_name: ansible_role_cri_o
   author: iamenr0s
@@ -9,24 +11,28 @@ galaxy_info:
   platforms:
     - name: "EL"
       versions:
+        - "8"
+        - "9"
+        - "10"
+    - name: "Rocky"
+      versions:
         - "all"
     - name: "Fedora"
       versions:
-        - "all"
+        - "42"
+        - "43"
+        - "44"
     - name: "Debian"
       versions:
-        - "all"
+        - "bookworm"
+        - "trixie"
     - name: "Ubuntu"
       versions:
-        - "all"
-    
+        - "jammy"
+        - "noble"
   galaxy_tags:
     - crio
     - containers
     - kubernetes
     - podman
     - linux
-
-dependencies: []
-collections:
-  - ansible.posix

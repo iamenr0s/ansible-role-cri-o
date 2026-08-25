@@ -1,0 +1,53 @@
+---
+
+- name: Verify
+  hosts: all
+  gather_facts: true
+  become: false
+
+  tasks:
+    - name: Verify | Gather package facts
+      ansible.builtin.package_facts:
+        manager: auto
+
+    - name: Verify | Assert cri-o package is installed
+      ansible.builtin.assert:
+        that:
+          - "'cri-o' in ansible_facts.packages"
+        fail_msg: "cri-o package was not installed"
+
+    - name: Verify | Check crio binary is present
+      ansible.builtin.command:
+        cmd: crio --version
+      register: __verify_crio_version
+      changed_when: false
+
+    - name: Verify | Assert crio binary reports a version
+      ansible.builtin.assert:
+        that:
+          - __verify_crio_version.rc == 0
+          - "'crio version' in __verify_crio_version.stdout"
+        fail_msg: "crio --version did not report a usable version: {{ __verify_crio_version.stdout }}"
+
+    - name: Verify | Check /etc/crio/crio.conf.d exists
+      ansible.builtin.stat:
+        path: /etc/crio/crio.conf.d
+      register: __verify_crio_confd
+
+    - name: Verify | Assert /etc/crio/crio.conf.d is a directory
+      ansible.builtin.assert:
+        that:
+          - __verify_crio_confd.stat.exists
+          - __verify_crio_confd.stat.isdir
+        fail_msg: "/etc/crio/crio.conf.d was not created as expected"
+
+    - name: Verify | Gather service facts
+      ansible.builtin.service_facts:
+      when: ansible_facts['service_mgr'] == 'systemd'
+
+    - name: Verify | Assert crio systemd unit is registered
+      ansible.builtin.assert:
+        that:
+          - "'crio.service' in ansible_facts.services"
+        fail_msg: "crio.service unit is not registered with systemd"
+      when: ansible_facts['service_mgr'] == 'systemd'

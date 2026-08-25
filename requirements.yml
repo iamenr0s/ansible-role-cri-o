@@ -1,12 +1,7 @@
 ---
-
-# Ansible Requirements for Swap Role
+# Ansible Collections Requirements for ansible-role-cri-o
 # Install with: ansible-galaxy install -r requirements.yml
-# Collections
-collections:
-  - name: ansible.posix
-    version: ">=1.3.0"
-  - name: community.general
-    version: ">=8.0.0"
+
+collections: []
 
 # No roles required

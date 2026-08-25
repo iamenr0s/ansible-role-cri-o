@@ -6,14 +6,17 @@
     url: "{{ crio_apt_key_url }}"
     keyring: "/usr/share/keyrings/crio-obs.gpg"
     state: present
+  tags: crio
 
 - name: setup-Debian | Add CRI-O APT repository
   ansible.builtin.apt_repository:
     repo: "deb [signed-by=/usr/share/keyrings/crio-obs.gpg] {{ crio_apt_repository }} /"
     filename: "cri-o"
     state: present
+  tags: crio
 
 - name: setup-Debian | Update apt cache
   ansible.builtin.apt:
     update_cache: true
     cache_valid_time: 3600
+  tags: crio

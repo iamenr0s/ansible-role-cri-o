@@ -1,43 +1,48 @@
-[![Molecule](https://github.com/iamenr0s/ansible-role-cri-o/actions/workflows/molecule.yml/badge.svg)](https://github.com/iamenr0s/ansible-role-cri-o/actions/workflows/molecule.yml) [![Release](https://github.com/iamenr0s/ansible-role-cri-o/actions/workflows/release.yml/badge.svg)](https://github.com/iamenr0s/ansible-role-cri-o/actions/workflows/release.yml) ![Ansible Role](https://img.shields.io/ansible/role/d/iamenr0s/ansible_role_cri_o) [![CodeFactor](https://www.codefactor.io/repository/github/iamenr0s/ansible-role-cri-o/badge)](https://www.codefactor.io/repository/github/iamenr0s/ansible-role-cri-o)
+[![Molecule](https://github.com/iamenr0s/ansible-role-cri-o/actions/workflows/molecule.yml/badge.svg)](https://github.com/iamenr0s/ansible-role-cri-o/actions/workflows/molecule.yml) ![Ansible Role](https://img.shields.io/ansible/role/d/iamenr0s/ansible_role_cri_o) [![CodeFactor](https://www.codefactor.io/repository/github/iamenr0s/ansible-role-cri-o/badge)](https://www.codefactor.io/repository/github/iamenr0s/ansible-role-cri-o)
 
 Ansible Role: CRI-O
-=========
+====================
 
-This Ansible Role automates the installation of CRI-O on Linux systems.
+This Ansible Role automates the installation and configuration of [CRI-O](https://cri-o.io/) on RHEL-family, Fedora, Debian, and Ubuntu hosts.
 
-Supported OSs
+Features
+--------
+- Adds the upstream OBS `cri-o` repository (yum/dnf or APT, matching `crio_version`).
+- Installs and configures CRI-O, including its `/etc/crio/crio.conf.d` drop-in directory.
+- Optionally installs and configures `crun` as the container runtime.
+- Optionally pins the crio systemd service to a non-default systemd slice.
+- Supports arbitrary extra CRI-O configuration via `crio_extra_config`.
+- Manages the crio systemd service state.
+
+Requirements
 ------------
+- Ansible 2.9 or higher.
+- No additional collections required.
 
-- AlmaLinux 8
-- AlmaLinux 9
-- AlmaLinux 10
-- Fedora 39+
-- RockyLinux 8
-- RockyLinux 9
-- RockyLinux 10
- - Debian 11
- - Debian 12
- - Ubuntu 22.04
- - Ubuntu 24.04
+Supported Platforms
+--------------------
 
-## Requirements
-
-- Ansible 2.9 or higher
-- Collections: `ansible.posix`
+| Family     | Versions              |
+| ---------- | ---------------------- |
+| AlmaLinux  | 8, 9, 10                |
+| RockyLinux | 8, 9, 10                |
+| Fedora     | 42, 43, 44              |
+| Debian     | 12 (bookworm), 13 (trixie) |
+| Ubuntu     | 22.04 (jammy), 24.04 (noble) |
 
 Role Variables
 --------------
 
-Available variables and their default values are listed below (refer to defaults/main.yml):
+Available variables and their default values are listed below (refer to `defaults/main.yml`):
 
-#### Package version.
+#### Package version
 	crio_version: "v1.32"
 
-#### Package options.
+#### Package options
 	crio_package: cri-o
 	crio_package_state: present
 
-#### Service options.
+#### Service options
 	crio_service_state: started
 	crio_service_enabled: true
 
@@ -50,35 +55,77 @@ Available variables and their default values are listed below (refer to defaults
 #### Container runtime
 	crio_runtime: "runc"
 
-#### CRI-O extra configurations
+#### CRI-O extra configuration
 	crio_extra_config: ''
-
-Dependencies
-------------
-
-No dependencies required.
 
 Example Playbook
 ----------------
 
-    - hosts: all
-      roles:
-         - { role: iamenr0s.ansible_role_cri_o }
+```yaml
+- hosts: all
+  become: true
+  roles:
+    - role: iamenr0s.ansible_role_cri_o
+```
 
-## License
+Pin a specific CRI-O version and use `crun` as the runtime:
 
-This project is licensed under the [MIT License](LICENSE).
+```yaml
+- hosts: all
+  become: true
+  vars:
+    crio_version: "v1.32"
+    crio_runtime: crun
+  roles:
+    - role: iamenr0s.ansible_role_cri_o
+```
 
-## Author Information
+Run the crio service in a dedicated systemd slice with extra configuration:
 
+```yaml
+- hosts: all
+  become: true
+  vars:
+    crio_systemd_slice: "kubepods.slice"
+    crio_extra_config: |
+      [crio.runtime]
+      log_level = "debug"
+  roles:
+    - role: iamenr0s.ansible_role_cri_o
+```
+
+Dependencies
+------------
+No dependencies required.
+
+Contributing & Security
+------------------------
+- Contributions are welcome — see [CONTRIBUTING.md](CONTRIBUTING.md).
+- Report vulnerabilities privately per [SECURITY.md](SECURITY.md); do not open public issues for them.
+
+CI & Release (maintainers)
+---------------------------
+A single workflow (`.github/workflows/molecule.yml`) runs lint and the full Molecule distro matrix on pushes to `main`, PRs, and `v*` tags. On `v*` tags, a `release` job publishes to Ansible Galaxy after all tests pass.
+
+The Galaxy API key lives in the `galaxy` GitHub environment, which only `v*` tags may target. One-time setup:
+
+```bash
+# Galaxy publishing key (environment-scoped, get it from galaxy.ansible.com/ui/token)
+gh secret set GALAXY_API_KEY --env galaxy --repo iamenr0s/ansible-role-cri-o
+
+# Code scanning notifications (Slack webhook URL; for Discord append /slack to the webhook URL)
+gh secret set SECURITY_ALERT_WEBHOOK --env galaxy --repo iamenr0s/ansible-role-cri-o
+```
+
+`.github/workflows/code-scanning-notify.yml` polls the code-scanning API every 6 hours and posts new or updated open alerts to that webhook (GitHub Actions cannot trigger on `code_scanning_alert` directly).
+
+To release: tag a commit `vX.Y.Z` and push the tag — CI gates the Galaxy publish.
+
+License
+-------
+MIT
+
+Author Information
+-------------------
 Author: iamenr0s
-Galaxy: `iamenr0s.ansible_role_swap`
-
-## Contributing
-
-Contributions are welcome! Please:
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests if applicable
-5. Submit a pull request
+Galaxy: `iamenr0s.ansible_role_cri_o`

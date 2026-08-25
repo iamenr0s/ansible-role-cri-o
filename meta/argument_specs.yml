@@ -1,0 +1,47 @@
+---
+
+argument_specs:
+  main:
+    short_description: Installs and configures CRI-O on RHEL-family, Fedora, Debian, and Ubuntu hosts.
+    options:
+      crio_version:
+        description: CRI-O major.minor version to install, used to select the upstream OBS repository.
+        type: str
+        default: "v1.32"
+      crio_package:
+        description: Name of the CRI-O package to install.
+        type: str
+        default: cri-o
+      crio_package_state:
+        description: State passed to the package module when installing CRI-O.
+        type: str
+        default: present
+      crio_service_state:
+        description: Desired state of the crio systemd service.
+        type: str
+        default: started
+      crio_service_enabled:
+        description: Whether the crio systemd service is enabled at boot.
+        type: bool
+        default: true
+      crio_storage_driver:
+        description: Storage driver CRI-O should use for container storage.
+        type: str
+        default: overlay
+      crio_systemd_slice:
+        description: >-
+          Systemd slice to run the crio service in. When set to something
+          other than the default, an override unit is written under
+          /etc/systemd/system/crio.service.d/.
+        type: str
+        default: system.slice
+      crio_runtime:
+        description: >-
+          Container runtime CRI-O should use. When set to "crun", crun is
+          installed and configured as the default OCI runtime.
+        type: str
+        default: runc
+      crio_extra_config:
+        description: Extra CRI-O configuration content written to /etc/crio/crio.conf.d/99-extra.conf.
+        type: str
+        default: ""

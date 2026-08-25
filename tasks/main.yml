@@ -1,23 +1,15 @@
 ---
 # tasks file for ansible-role-cri-o
 
-- name: Include based RedHat OS Family
+- name: Include tasks for RedHat OS family
   ansible.builtin.include_tasks: setup-RedHat.yml
-  when: ansible_os_family == 'RedHat'
+  when: ansible_facts['os_family'] == 'RedHat'
+  tags: crio
 
-- name: Include based Debian OS Family
+- name: Include tasks for Debian OS family
   ansible.builtin.include_tasks: setup-Debian.yml
-  when: ansible_os_family == 'Debian' 
-
-- name: Set desired CRI-O major.minor version (RedHat)
-  ansible.builtin.set_fact:
-    crio_desired_version: "{{ crio_version | regex_replace('^v', '') }}"
-  when: ansible_os_family == 'RedHat'
-
-- name: Set desired CRI-O major.minor version (Debian)
-  ansible.builtin.set_fact:
-    crio_desired_version: "{{ crio_version | regex_replace('^v', '') }}"
-  when: ansible_os_family == 'Debian'
+  when: ansible_facts['os_family'] == 'Debian'
+  tags: crio
 
 - name: Ensure /etc/crio/crio.conf.d exists
   ansible.builtin.file:
@@ -26,15 +18,17 @@
     owner: root
     group: root
     mode: "0755"
+  tags: crio
 
-- name: Install crun
+- name: Install crun (Fedora dnf5)
   ansible.builtin.dnf5:
     name: "crun"
     state: "{{ crio_package_state }}"
   when:
     - crio_runtime == 'crun'
-    - ansible_distribution == 'Fedora'
-    - (ansible_distribution_major_version | int) >= 41
+    - ansible_facts['distribution'] == 'Fedora'
+    - (ansible_facts['distribution_major_version'] | int) >= 41
+  tags: crio
 
 - name: Install crun (RedHat dnf)
   ansible.builtin.dnf:
@@ -42,16 +36,18 @@
     state: "{{ crio_package_state }}"
   when:
     - crio_runtime == 'crun'
-    - ansible_os_family == 'RedHat'
-    - not (ansible_distribution == 'Fedora' and (ansible_distribution_major_version | int) >= 41)
+    - ansible_facts['os_family'] == 'RedHat'
+    - not (ansible_facts['distribution'] == 'Fedora' and (ansible_facts['distribution_major_version'] | int) >= 41)
+  tags: crio
 
 - name: Install crun (Debian)
   ansible.builtin.apt:
     name: "crun"
     state: "{{ crio_package_state }}"
   when:
-    - ansible_os_family == 'Debian'
+    - ansible_facts['os_family'] == 'Debian'
     - crio_runtime == 'crun'
+  tags: crio
 
 - name: Configure CRI-O to use crun
   ansible.builtin.copy:
@@ -61,22 +57,25 @@
     group: root
     mode: "0644"
   when: crio_runtime == 'crun'
+  tags: crio
 
-- name: Install containers-common
+- name: Install containers-common (Fedora dnf5)
   ansible.builtin.dnf5:
     name: "containers-common"
     state: "{{ crio_package_state }}"
   when:
-    - ansible_distribution == 'Fedora'
-    - (ansible_distribution_major_version | int) >= 41
+    - ansible_facts['distribution'] == 'Fedora'
+    - (ansible_facts['distribution_major_version'] | int) >= 41
+  tags: crio
 
 - name: Install containers-common (RedHat dnf)
   ansible.builtin.dnf:
     name: "containers-common"
     state: "{{ crio_package_state }}"
   when:
-    - ansible_os_family == 'RedHat'
-    - not (ansible_distribution == 'Fedora' and (ansible_distribution_major_version | int) >= 41)
+    - ansible_facts['os_family'] == 'RedHat'
+    - not (ansible_facts['distribution'] == 'Fedora' and (ansible_facts['distribution_major_version'] | int) >= 41)
+  tags: crio
 
 - name: Ensure /etc/systemd/system/crio.service.d exists
   ansible.builtin.file:
@@ -86,6 +85,7 @@
     group: root
     mode: "0755"
   when: crio_systemd_slice != 'system.slice'
+  tags: crio
 
 - name: Set the systemd slice of the CRI-O service
   ansible.builtin.template:
@@ -95,6 +95,7 @@
     group: root
     mode: "0644"
   when: crio_systemd_slice != 'system.slice'
+  tags: crio
 
 - name: Add extra CRI-O configuration to /etc/crio/crio.conf.d
   ansible.builtin.copy:
@@ -104,39 +105,49 @@
     group: root
     mode: "0644"
   when: (crio_extra_config | default('')) | length > 0
+  tags: crio
 
-- name: Ensure CRI-O is installed.
+- name: Ensure CRI-O is installed (Fedora dnf5)
   ansible.builtin.dnf5:
     name: "{{ crio_package }}"
     state: "{{ crio_package_state }}"
   when:
-    - ansible_distribution == 'Fedora'
-    - (ansible_distribution_major_version | int) >= 41
+    - ansible_facts['distribution'] == 'Fedora'
+    - (ansible_facts['distribution_major_version'] | int) >= 41
+  tags: crio
 
 - name: Ensure CRI-O is installed (RedHat dnf)
   ansible.builtin.dnf:
     name: "{{ crio_package }}"
     state: "{{ crio_package_state }}"
   when:
-    - ansible_os_family == 'RedHat'
-    - not (ansible_distribution == 'Fedora' and (ansible_distribution_major_version | int) >= 41)
+    - ansible_facts['os_family'] == 'RedHat'
+    - not (ansible_facts['distribution'] == 'Fedora' and (ansible_facts['distribution_major_version'] | int) >= 41)
+  tags: crio
 
 - name: Ensure CRI-O is installed (Debian)
   ansible.builtin.apt:
     name: "{{ crio_package }}"
     state: "{{ crio_package_state }}"
-  when: ansible_os_family == 'Debian'
+  when: ansible_facts['os_family'] == 'Debian'
+  tags: crio
 
-- name: Ensure CRI-O is started and enabled at boot.
+- name: Ensure CRI-O is started and enabled at boot (RedHat)
   ansible.builtin.service:
     name: crio
     state: "{{ crio_service_state }}"
     enabled: "{{ crio_service_enabled }}"
-  when: ansible_os_family == 'RedHat' and (crio_service_state == 'started' or (crio_service_enabled | bool))
+  when: >-
+    ansible_facts['os_family'] == 'RedHat' and
+    (crio_service_state == 'started' or (crio_service_enabled | bool))
+  tags: crio
 
-- name: Ensure CRI-O is started and enabled at boot. (Debian)
+- name: Ensure CRI-O is started and enabled at boot (Debian)
   ansible.builtin.service:
     name: crio
     state: "{{ crio_service_state }}"
     enabled: "{{ crio_service_enabled }}"
-  when: ansible_os_family == 'Debian' and (crio_service_state == 'started' or (crio_service_enabled | bool))
+  when: >-
+    ansible_facts['os_family'] == 'Debian' and
+    (crio_service_state == 'started' or (crio_service_enabled | bool))
+  tags: crio
