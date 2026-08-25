@@ -27,8 +27,16 @@ Supported Platforms
 | AlmaLinux  | 8, 9, 10                |
 | RockyLinux | 8, 9, 10                |
 | Fedora     | 42, 43, 44              |
-| Debian     | 12 (bookworm), 13 (trixie) |
+| Debian     | 12 (bookworm), 13 (trixie)\* |
 | Ubuntu     | 22.04 (jammy), 24.04 (noble) |
+
+\* **Debian 13 (trixie) is a known-failing CI leg.** trixie's apt now verifies
+signatures with `sqv`, which since 2026-02-01 rejects the legacy v3 OpenPGP
+signature the upstream CRI-O OBS repository still signs its `InRelease` with.
+This is an upstream signing issue, not a bug in this role — there is no
+Ansible-side fix. The role and its APT repository setup work correctly on
+trixie once upstream re-signs with a modern key; until then, `MOLECULE_DISTRO=debian13 molecule test` fails at the `apt-get update` step and CI runs
+it with `continue-on-error: true`.
 
 Role Variables
 --------------

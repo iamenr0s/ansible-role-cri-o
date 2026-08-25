@@ -65,6 +65,14 @@ jobs:
             ansible_pin: "ansible<10"
           - distro: rockylinux8
             ansible_pin: "ansible<10"
+          # debian13 (trixie) switched apt's verification backend to sqv,
+          # which since 2026-02-01 rejects the legacy v3 OpenPGP signature
+          # the upstream CRI-O OBS repo still signs its InRelease with.
+          # No Ansible-side fix exists; allowed to fail until upstream
+          # re-signs with a modern key. See CLAUDE.md.
+          - distro: debian13
+            allow_failure: true
+    continue-on-error: ${{ matrix.allow_failure == true }}
 
     steps:
       - name: Check out the codebase.
