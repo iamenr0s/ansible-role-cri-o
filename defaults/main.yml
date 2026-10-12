@@ -1,7 +1,7 @@
 ---
 # defaults file for ansible-role-cri-o
 
-crio_version: "v1.32"
+crio_version: "v1.34"
 
 # Package options.
 crio_package: cri-o
