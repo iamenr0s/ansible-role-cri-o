@@ -44,3 +44,7 @@ CLAUDE.md
 # Build outputs (if any)
 dist/
 build/
+
+# Code intelligence indexes
+.codegraph/
+graphify-out/
