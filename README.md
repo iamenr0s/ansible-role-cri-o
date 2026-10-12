@@ -44,7 +44,7 @@ Role Variables
 Available variables and their default values are listed below (refer to `defaults/main.yml`):
 
 #### Package version
-	crio_version: "v1.32"
+	crio_version: "v1.34"
 
 #### Package options
 	crio_package: cri-o
@@ -82,7 +82,7 @@ Pin a specific CRI-O version and use `crun` as the runtime:
 - hosts: all
   become: true
   vars:
-    crio_version: "v1.32"
+    crio_version: "v1.34"
     crio_runtime: crun
   roles:
     - role: iamenr0s.ansible_role_cri_o

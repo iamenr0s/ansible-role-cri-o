@@ -7,7 +7,7 @@ argument_specs:
       crio_version:
         description: CRI-O major.minor version to install, used to select the upstream OBS repository.
         type: str
-        default: "v1.32"
+        default: "v1.34"
       crio_package:
         description: Name of the CRI-O package to install.
         type: str
