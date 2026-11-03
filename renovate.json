@@ -13,6 +13,11 @@
       "matchManagers": ["github-actions", "pre-commit"],
       "matchUpdateTypes": ["minor", "patch"],
       "automerge": true
+    },
+    {
+      "description": "ansible-core does not support Python 3.15 yet; drop once it does",
+      "matchDepNames": ["python"],
+      "allowedVersions": "<3.15"
     }
   ]
 }
